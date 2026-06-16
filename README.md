@@ -40,8 +40,20 @@ docker run -d --name zcode2api \
 - 环境变量同下方「环境变量」表,可在 `docker-compose.yml` 的 `environment` 下覆盖。
 - **请勿**将 `.env`、`data/` 打入镜像——已在 `.dockerignore` 中排除。
 
-> CI:`.github/workflows/docker-build.yml` 会在每次 push / PR 时**构建镜像以验证 Dockerfile**,
-> 但**不登录、不推送到 Docker Hub 或任何镜像仓库**。如需发布镜像,请自行在本地 `docker build` 后推送。
+### 自动构建镜像(GHCR)
+
+`.github/workflows/docker-build.yml` 会在**每次更新**(push 到 `master` 或打 `v*` tag)时
+**自动构建并发布镜像到 GHCR(GitHub 容器仓库,`ghcr.io`)**,使用内置 `GITHUB_TOKEN`,
+**不使用 Docker Hub**;Pull Request 仅构建验证、不推送。
+
+```bash
+# 拉取并运行已发布镜像（tag: latest 或 sha-xxxxxxx）
+docker run -d --name zcode2api -p 3000:3000 \
+  -v "$(pwd)/data:/data" -e ZCODE_ADMIN_KEY=zcode \
+  ghcr.io/yuanhhs/zcode2api:latest
+```
+
+> 首次发布后,GHCR 上的包默认可能为私有;如需公开拉取,请到仓库 **Packages → 该包 → Package settings → Change visibility** 设为 Public。
 
 ## 后台 UI
 
